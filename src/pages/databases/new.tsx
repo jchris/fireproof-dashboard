@@ -1,9 +1,8 @@
-import React from "react";
 import { useForm } from "react-hook-form";
-import { Form, redirect, useSubmit } from "react-router-dom";
+import { Form, redirect, SubmitTarget, useSubmit } from "react-router-dom";
 import { fireproof } from "use-fireproof";
 
-export async function Action({ request }) {
+export async function Action({ request }: { request: Request }) {
   const dbName = (await request.json()).dbName;
   const database = fireproof(dbName);
   await database.blockstore.loader?.ready();
@@ -14,25 +13,20 @@ export default function New() {
   const submit = useSubmit();
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = (data) => {
+  function onSubmit(data: SubmitTarget) {
     submit(data, {
       method: "post",
       action: ".",
       encType: "application/json",
     });
-  };
+  }
 
   return (
     <div className="bg-[--muted] shadow sm:rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-base font-semibold leading-6 text-[--foreground]">
-          New Database Name:
-        </h3>
+        <h3 className="text-base font-semibold leading-6 text-[--foreground]">New Database Name:</h3>
 
-        <Form
-          onSubmit={handleSubmit(onSubmit)}
-          className="mt-5 sm:flex sm:items-center"
-        >
+        <Form onSubmit={handleSubmit(onSubmit)} className="mt-5 sm:flex sm:items-center">
           <div className="w-full sm:max-w-xs">
             <label htmlFor="dbName" className="sr-only">
               Database Name

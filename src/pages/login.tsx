@@ -1,36 +1,56 @@
-import { ClerkProvider, SignIn } from "@clerk/clerk-react";
-import React from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { SignedOut, SignIn, SignInButton, useSession } from "@clerk/clerk-react";
+import { useEffect } from "react";
+import { useLoaderData } from "react-router-dom";
 
-export async function loader({ request }) {
-  const url = new URL(request.url);
-  const nextUrl = url.searchParams.get("next_url") || "/";
-  return nextUrl;
+export async function loginLoader({ request }: { request: Request }) {
+  // const url = new URL(request.url);
+  // const nextUrl = url.searchParams.get("next_url") || "/";
+  // return nextUrl;
 }
 
-export default function Login() {
-  const nextUrl = useLoaderData() as string;
-  const navigate = useNavigate();
+export function Login() {
+  // const nextUrl = useLoaderData() as string;
+  // const navigate = useNavigate();
+
+  const { isLoaded, session, isSignedIn } = useSession();
+
+  // const [token, setToken] = useState('');
+
+  useEffect(() => {
+    if (isSignedIn && isLoaded) {
+      session
+        .getToken({
+          template: "with-email",
+          // leewayInSeconds: 60
+        })
+        .then((token) => {
+          // setToken(token!)
+          console.log(token);
+          // fetch('http://localhost:3000/api/verify', {
+          //   method: 'POST',
+          //   body: JSON.stringify(token),
+          // }).catch(console.error).then(console.log)
+        });
+    }
+  }, [session, isLoaded, isSignedIn]);
+
+  console.log("token", isSignedIn, isLoaded, session);
 
   return (
-    <ClerkProvider
-      routerPush={(to) => navigate(to)}
-      routerReplace={(to) => navigate(to, { replace: true })}
-      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
-      signInFallbackRedirectUrl={nextUrl}
-    >
-      <div className="h-screen w-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <SignIn
-            appearance={{
-              elements: {
-                headerSubtitle: { display: "none" },
-                footer: { display: "none" },
-              },
-            }}
-          />
-        </div>
+    <div className="h-screen w-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+        <SignIn
+          appearance={{
+            elements: {
+              headerSubtitle: { display: "none" },
+              footer: { display: "none" },
+            },
+          }}
+        />
       </div>
-    </ClerkProvider>
+    </div>
   );
 }
